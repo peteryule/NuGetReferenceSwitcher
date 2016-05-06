@@ -83,7 +83,9 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                 if (Application != null)
                 {
                     if (Application.Solution != null)
-                        projects = GetAllProjects(Application.Solution.Projects.OfType<Project>());
+                        projects = 
+                            GetAllProjects(
+                                Application.Solution.Projects.OfType<Project>());
                 }
             }, token));
 
@@ -204,9 +206,13 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
 
         private List<ProjectModel> GetAllProjects(IEnumerable<Project> objects)
         {
+            var filteredObjects = 
+                objects.Where(p => !(p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase) 
+                || p.Name.StartsWith("xfa", StringComparison.OrdinalIgnoreCase)
+                || p.Name.StartsWith("additionaltestresources", StringComparison.OrdinalIgnoreCase)));
             var projects = new List<ProjectModel>();
 
-            foreach (var project in objects)
+            foreach (var project in filteredObjects)
             {
                 if (project.Kind == ProjectKinds.vsProjectKindSolutionFolder)
                 {
