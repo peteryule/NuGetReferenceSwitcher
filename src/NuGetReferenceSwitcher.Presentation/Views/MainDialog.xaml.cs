@@ -41,7 +41,7 @@ namespace NuGetReferenceSwitcher.Presentation.Views
 
             ViewModelHelper.RegisterViewModel(Model, this);
 
-            Model.Projects.ExtendedCollectionChanged += OnProjectsChanged;
+            Model.NonBWFProjects.ExtendedCollectionChanged += OnProjectsChanged;
             KeyUp += OnKeyUp;
         }
 
@@ -65,7 +65,7 @@ namespace NuGetReferenceSwitcher.Presentation.Views
 
         private void OnProjectsChanged(object sender, ExtendedNotifyCollectionChangedEventArgs<ProjectModel> args)
         {
-            if (Model.Projects.Any(p => p.CurrentToNuGetTransformations.Any()))
+            if (Model.NonBWFProjects.Any(p => p.CurrentToNuGetTransformations.Any()))
                 Tabs.SelectedIndex = 1;
         }
 

@@ -46,7 +46,7 @@ namespace NuGetReferenceSwitcher.Presentation.Models
                     ToProject = targetProject;
             }
             else
-                SelectedMode = NuGetToProjectMode.Deactivated;
+                SelectedMode = NuGetToProjectMode.Project;
         }
 
         /// <summary>Gets or sets the NuGet assembly name to switch. </summary>

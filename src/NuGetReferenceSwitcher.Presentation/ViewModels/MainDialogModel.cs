@@ -31,15 +31,18 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
 
         public MainDialogModel()
         {
-            Projects = new ExtendedObservableCollection<ProjectModel>();
+            NonBWFProjects = new ExtendedObservableCollection<ProjectModel>();
+            BWFProjects = new ExtendedObservableCollection<ProjectModel>();
             Transformations = new ExtendedObservableCollection<FromNuGetToProjectTransformation>();
 
-            RemoveProjects = true;
+            RemoveProjects = false;
             SaveProjects = true;
         }
 
         /// <summary>Gets the projects of the current solution. </summary>
-        public ExtendedObservableCollection<ProjectModel> Projects { get; private set; }
+        public ExtendedObservableCollection<ProjectModel> NonBWFProjects { get; private set; }
+
+        public ExtendedObservableCollection<ProjectModel> BWFProjects { get; private set; }
 
         /// <summary>Gets the NuGet to project switches which are shown in the first tab. </summary>
         public ExtendedObservableCollection<FromNuGetToProjectTransformation> Transformations { get; private set; }
@@ -83,18 +86,24 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                 if (Application != null)
                 {
                     if (Application.Solution != null)
-                        projects = 
-                            GetAllProjects(
-                                Application.Solution.Projects.OfType<Project>());
+                        projects =
+                            GetAllProjects(Application.Solution.Projects.OfType<Project>(), false);
+                    //GetAllProjects(
+                    //    Application.Solution.Projects.OfType<Project>());
                 }
             }, token));
 
-            Projects.Initialize(projects);
+            NonBWFProjects.Initialize(projects);
             Transformations.Initialize(projects
-                .SelectMany(p => p.NuGetReferences)
+                .SelectMany(p => p.NuGetReferences.Where(z => 
+                    z.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)
+                    || z.Name.StartsWith("brady", StringComparison.OrdinalIgnoreCase)))
                 .GroupBy(r => r.Name)
                 .Select(g => new FromNuGetToProjectTransformation(projects, g.First()))
                 .OrderBy(s => s.FromAssemblyName));
+
+            //BWFProjects.AddRange(GetAllProjects(Application.Solution.Projects.OfType<Project>(), true).GroupBy(r => r.Name)
+            //    .Select(g =>  g.First()).OrderBy(s => s.Name));
         }
 
         /// <summary>Switches the NuGet DLL references to the selected project references. </summary>
@@ -113,8 +122,11 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                     AddProjectToSolutionIfNeeded(transformation);
                 }
 
+                var allNonBwfProjects = GetAllProjects(Application.Solution.Projects.OfType<Project>(), false);
+                var allBwfProjects = GetAllProjects(Application.Solution.Projects.OfType<Project>(), true);
+
                 // then, run through all projects and replace nuget dependencies with project references
-                foreach (var project in GetAllProjects(Application.Solution.Projects.OfType<Project>()))
+                foreach (var project in allNonBwfProjects)
                 {
                     var nuGetReferenceTransformationsForProject = "";
                     foreach (var assemblyToProjectSwitch in activeTransformations)
@@ -125,10 +137,16 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
 
                         if (reference != null)
                         {
+                            if (assemblyToProjectSwitch.ToProject == null)
+                            {
+                                assemblyToProjectSwitch.ToProject = allBwfProjects.Single(x => x.Name == reference.Name);
+                            }
+
                             if (assemblyToProjectSwitch.ToProject != null)
                             {
                                 var fromAssemblyPath = reference.Path;
                                 reference.Remove();
+
 
                                 project.AddProjectReference(assemblyToProjectSwitch.ToProject);
                                 nuGetReferenceTransformationsForProject +=
@@ -136,7 +154,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                                     PathUtilities.MakeRelative(assemblyToProjectSwitch.ToProject.Path,
                                         project.CurrentConfigurationPath) + "\t" +
                                     PathUtilities.MakeRelative(fromAssemblyPath, project.CurrentConfigurationPath) +
-                                    "\n";                                
+                                    "\n";
                             }
                             else
                             {
@@ -173,7 +191,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
             await RunTaskAsync(token => Task.Run(() =>
             {
                 var projectsToRemove = GetCurrentProjectsToRemove();
-                foreach (var project in Projects)
+                foreach (var project in NonBWFProjects)
                 {
                     foreach (var transformation in project.CurrentToNuGetTransformations)
                     {
@@ -189,7 +207,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                             {
                                 MessageBox.Show("The project '" + transformation.ToAssemblyPath + "' could not be added. " +
                                                 "\nSkipped.", "Could not add project", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }                           
+                            }
                         }
                     }
 
@@ -204,12 +222,28 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
             }, token));
         }
 
-        private List<ProjectModel> GetAllProjects(IEnumerable<Project> objects)
+        //private List<ProjectModel> GetAllNonBwfProjects(IEnumerable<Project> objects)
+        //{
+        //    return GetAllProjects(filteredObjects);
+        //}
+
+        //private List<ProjectModel> GetAllBwfProjects(IEnumerable<Project> objects)
+        //{
+        //    var filteredObjects =
+        //        objects.Where(p => p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        //    return GetAllProjects(filteredObjects);
+        //}
+
+        private List<ProjectModel> GetAllProjects(IEnumerable<Project> objects, bool bwfProjects)
         {
-            var filteredObjects = 
-                objects.Where(p => !(p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase) 
+            var filteredObjects = bwfProjects ?
+                objects//.Where(p => p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)).ToList()
+                : objects.Where(p => !(p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)
+                || p.Name.StartsWith("brady", StringComparison.OrdinalIgnoreCase)
                 || p.Name.StartsWith("xfa", StringComparison.OrdinalIgnoreCase)
-                || p.Name.StartsWith("additionaltestresources", StringComparison.OrdinalIgnoreCase)));
+                || p.Name.StartsWith("additionaltestresources", StringComparison.OrdinalIgnoreCase))).ToList();
+
             var projects = new List<ProjectModel>();
 
             foreach (var project in filteredObjects)
@@ -219,7 +253,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                     projects.AddRange(GetAllProjects(project.ProjectItems
                         .OfType<ProjectItem>()
                         .Where(i => i.SubProject != null)
-                        .Select(i => i.SubProject)));
+                        .Select(i => i.SubProject), bwfProjects));
                 }
                 else
                 {
@@ -248,9 +282,9 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
 
         private List<ProjectModel> GetCurrentProjectsToRemove()
         {
-            return Projects
+            return NonBWFProjects
                 .SelectMany(p => p.CurrentToNuGetTransformations.Select(s => s.FromProjectName))
-                .Select(name => Projects.SingleOrDefault(p => p.Name == name))
+                .Select(name => NonBWFProjects.SingleOrDefault(p => p.Name == name))
                 .ToList();
         }
 

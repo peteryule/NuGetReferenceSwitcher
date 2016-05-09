@@ -46,28 +46,28 @@
                                                      GroupName="{Binding FromAssemblyName}"
                                                      Content="Do not replace" Margin="0,0,0,4" />
 
-                                        <RadioButton IsChecked="{Binding SelectedMode, Mode=TwoWay, ConverterParameter='ProjectPath', Converter={StaticResource NuGetToProjectModeConverter}}" 
+                                        <!--<RadioButton IsChecked="{Binding SelectedMode, Mode=TwoWay, ConverterParameter='ProjectPath', Converter={StaticResource NuGetToProjectModeConverter}}" 
                                                      GroupName="{Binding FromAssemblyName}" Margin="0,0,0,4"
-                                                     Content="Add new Project to Solution" />
+                                                     Content="Add new Project to Solution" />-->
 
                                         <RadioButton IsChecked="{Binding SelectedMode, Mode=TwoWay, ConverterParameter='Project', Converter={StaticResource NuGetToProjectModeConverter}}" 
                                                      GroupName="{Binding FromAssemblyName}"
                                                      Content="Use existing Project" />
 
-                                        <StackPanel Visibility="{Binding SelectedMode, Mode=OneWay, ConverterParameter='Deactivated', Converter={StaticResource NotNuGetToProjectModeConverter}}" 
+                                        <!--<StackPanel Visibility="{Binding SelectedMode, Mode=OneWay, ConverterParameter='Deactivated', Converter={StaticResource NotNuGetToProjectModeConverter}}" 
                                                     Margin="0,4,0,0">
-                                            <StackPanel Visibility="{Binding SelectedMode, Mode=OneWay, ConverterParameter='ProjectPath', Converter={StaticResource NuGetToProjectModeConverter}}">
+                                            --><!--<StackPanel Visibility="{Binding SelectedMode, Mode=OneWay, ConverterParameter='ProjectPath', Converter={StaticResource NuGetToProjectModeConverter}}">
                                                 <Button Content="Select Project to add" Click="OnSelectProjectFile" Tag="{Binding}" />
                                                 <TextBlock Text="{Binding ToProjectPath}" TextWrapping="Wrap" Margin="0,4,0,0"
                                                            Visibility="{Binding ToProjectPath, Converter={StaticResource VisibilityConverter}}" />
-                                            </StackPanel>
+                                            </StackPanel>--><!--
 
                                             <StackPanel Visibility="{Binding SelectedMode, Mode=OneWay, ConverterParameter='Project', Converter={StaticResource NuGetToProjectModeConverter}}">
-                                                <ComboBox ItemsSource="{Binding Projects, Source={StaticResource ViewModel}}"
+                                                <ComboBox ItemsSource="{Binding BWFProjects, Source={StaticResource ViewModel}}"
                                                           SelectedItem="{Binding ToProject, Mode=TwoWay}"
                                                           DisplayMemberPath="Name" />
                                             </StackPanel>
-                                        </StackPanel>
+                                        </StackPanel>-->
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -77,7 +77,7 @@
                     <TextBlock Text="Scanned projects" FontWeight="Bold" FontSize="16" 
                                Grid.Row="0" Grid.Column="1" Margin="8" />
                     <ScrollViewer Grid.Row="1" Grid.Column="1">
-                        <ItemsControl ItemsSource="{Binding Projects}" Margin="8">
+                        <ItemsControl ItemsSource="{Binding NonBWFProjects}" Margin="8">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,0,8">
@@ -113,7 +113,7 @@
                                FontWeight="Bold" FontSize="16" Margin="8" />
 
                     <ScrollViewer Grid.Row="1">
-                        <ItemsControl ItemsSource="{Binding Projects}" Margin="8">
+                        <ItemsControl ItemsSource="{Binding NonBWFProjects}" Margin="8">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,0,8">
@@ -150,22 +150,11 @@
                 <StackPanel Margin="8">
                     <TextBlock Margin="0,0,0,8" FontSize="14">
                         NuGet Reference Switcher has been developed by 
-                        <Hyperlink NavigateUri="http://www.rsuter.com" Click="OnOpenHyperlink">Rico Suter</Hyperlink>.
-                    </TextBlock>
-                    <TextBlock Margin="0,0,0,8" FontSize="14" FontWeight="Bold">
-                        Read 
-                        <Hyperlink NavigateUri="https://nugetreferenceswitcher.codeplex.com/wikipage?title=Guide" 
-                                   Click="OnOpenHyperlink">this guide</Hyperlink>
-                        about how to use the extension.
+                        <Hyperlink NavigateUri="http://www.rsuter.com" Click="OnOpenHyperlink">Rico Suter</Hyperlink> and modified by Peter Yule.
                     </TextBlock>
                     <TextBlock Margin="0,0,0,8">
                         Version: <Run Text="{Binding ExtensionVersion, Mode=OneWay}" />, 
                         License: <Hyperlink NavigateUri="https://nugetreferenceswitcher.codeplex.com/license" Click="OnOpenHyperlink">Ms-PL</Hyperlink>
-                    </TextBlock>
-                    <TextBlock Text="Components" FontWeight="Bold" Margin="0,0,0,4" />
-                    <TextBlock Margin="0,0,0,4">
-                        - <Hyperlink NavigateUri="http://mytoolkit.codeplex.com" Click="OnOpenHyperlink">MyToolkit</Hyperlink>: 
-                          .NET library with MVVM classes, controls and more components.
                     </TextBlock>
                 </StackPanel>
             </TabItem>
