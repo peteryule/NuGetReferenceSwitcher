@@ -240,7 +240,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
             var filteredObjects = bwfProjects ?
                 objects//.Where(p => p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)).ToList()
                 : objects.Where(p => !(p.Name.StartsWith("bwf", StringComparison.OrdinalIgnoreCase)
-                || p.Name.StartsWith("brady", StringComparison.OrdinalIgnoreCase)
+               // || p.Name.StartsWith("brady", StringComparison.OrdinalIgnoreCase)
                 || p.Name.StartsWith("xfa", StringComparison.OrdinalIgnoreCase)
                 || p.Name.StartsWith("additionaltestresources", StringComparison.OrdinalIgnoreCase))).ToList();
 
