@@ -138,9 +138,7 @@ namespace NuGetReferenceSwitcher.Presentation.ViewModels
                         if (reference != null)
                         {
                             if (assemblyToProjectSwitch.ToProject == null)
-                            {
-                                assemblyToProjectSwitch.ToProject = allBwfProjects.Single(x => x.Name == reference.Name);
-                            }
+                                assemblyToProjectSwitch.ToProject = allBwfProjects.SingleOrDefault(x => x.Name == reference.Name);
 
                             if (assemblyToProjectSwitch.ToProject != null)
                             {
